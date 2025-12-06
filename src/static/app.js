@@ -473,6 +473,67 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  // Helper function to encode HTML entities
+  function encodeHTML(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  // Social sharing handler functions
+  function handleShareTwitter(activityName, description, schedule) {
+    const text = `Check out ${activityName} at Mergington High School! ${description.substring(0, 100)}... Schedule: ${schedule}`;
+    const url = window.location.href;
+    const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
+    window.open(twitterUrl, '_blank', 'width=550,height=420');
+  }
+
+  function handleShareFacebook(activityName) {
+    const url = window.location.href;
+    const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
+    window.open(facebookUrl, '_blank', 'width=550,height=420');
+  }
+
+  function handleShareEmail(activityName, description, schedule) {
+    const subject = `Check out ${activityName} at Mergington High School`;
+    const body = `I thought you might be interested in this activity:\n\n${activityName}\n\n${description}\n\nSchedule: ${schedule}\n\nVisit: ${window.location.href}`;
+    const mailtoUrl = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    window.open(mailtoUrl, '_blank');
+  }
+
+  function handleCopyLink(activityName, description, schedule) {
+    const textToCopy = `${activityName} at Mergington High School\n${description}\nSchedule: ${schedule}\nLearn more: ${window.location.href}`;
+    
+    // Try using the modern Clipboard API
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(textToCopy).then(() => {
+        showMessage('Activity details copied to clipboard!', 'success');
+      }).catch(err => {
+        // Fallback to older method
+        copyToClipboardFallback(textToCopy);
+      });
+    } else {
+      // Fallback for older browsers or non-secure contexts
+      copyToClipboardFallback(textToCopy);
+    }
+  }
+
+  function copyToClipboardFallback(text) {
+    const textArea = document.createElement('textarea');
+    textArea.value = text;
+    textArea.style.position = 'fixed';
+    textArea.style.left = '-999999px';
+    document.body.appendChild(textArea);
+    textArea.select();
+    try {
+      document.execCommand('copy');
+      showMessage('Activity details copied to clipboard!', 'success');
+    } catch (err) {
+      showMessage('Failed to copy. Please try again.', 'error');
+    }
+    document.body.removeChild(textArea);
+  }
+
   // Function to render a single activity card
   function renderActivityCard(name, details) {
     const activityCard = document.createElement("div");
@@ -529,6 +590,24 @@ document.addEventListener("DOMContentLoaded", () => {
         <span class="tooltip-text">Regular meetings at this time throughout the semester</span>
       </p>
       ${capacityIndicator}
+      <div class="social-share-buttons">
+        <button class="share-btn share-twitter tooltip" data-activity="${encodeHTML(name)}" data-schedule="${encodeHTML(formattedSchedule)}" data-description="${encodeHTML(details.description)}" title="Share on Twitter">
+          <span class="share-icon">🐦</span>
+          <span class="tooltip-text">Share on Twitter</span>
+        </button>
+        <button class="share-btn share-facebook tooltip" data-activity="${encodeHTML(name)}" title="Share on Facebook">
+          <span class="share-icon">📘</span>
+          <span class="tooltip-text">Share on Facebook</span>
+        </button>
+        <button class="share-btn share-email tooltip" data-activity="${encodeHTML(name)}" data-schedule="${encodeHTML(formattedSchedule)}" data-description="${encodeHTML(details.description)}" title="Share via Email">
+          <span class="share-icon">✉️</span>
+          <span class="tooltip-text">Share via Email</span>
+        </button>
+        <button class="share-btn share-copy tooltip" data-activity="${encodeHTML(name)}" data-schedule="${encodeHTML(formattedSchedule)}" data-description="${encodeHTML(details.description)}" title="Copy Link">
+          <span class="share-icon">🔗</span>
+          <span class="tooltip-text">Copy Link</span>
+        </button>
+      </div>
       <div class="participants-list">
         <h5>Current Participants:</h5>
         <ul>
@@ -587,6 +666,17 @@ document.addEventListener("DOMContentLoaded", () => {
         });
       }
     }
+
+    // Add click handlers for social share buttons
+    const shareTwitterBtn = activityCard.querySelector(".share-twitter");
+    const shareFacebookBtn = activityCard.querySelector(".share-facebook");
+    const shareEmailBtn = activityCard.querySelector(".share-email");
+    const shareCopyBtn = activityCard.querySelector(".share-copy");
+
+    shareTwitterBtn.addEventListener("click", () => handleShareTwitter(name, details.description, formattedSchedule));
+    shareFacebookBtn.addEventListener("click", () => handleShareFacebook(name));
+    shareEmailBtn.addEventListener("click", () => handleShareEmail(name, details.description, formattedSchedule));
+    shareCopyBtn.addEventListener("click", () => handleCopyLink(name, details.description, formattedSchedule));
 
     activitiesList.appendChild(activityCard);
   }
