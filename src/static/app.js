@@ -473,6 +473,13 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  // Helper function to encode HTML entities
+  function encodeHTML(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
   // Social sharing handler functions
   function handleShareTwitter(activityName, description, schedule) {
     const text = `Check out ${activityName} at Mergington High School! ${description.substring(0, 100)}... Schedule: ${schedule}`;
@@ -491,7 +498,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const subject = `Check out ${activityName} at Mergington High School`;
     const body = `I thought you might be interested in this activity:\n\n${activityName}\n\n${description}\n\nSchedule: ${schedule}\n\nVisit: ${window.location.href}`;
     const mailtoUrl = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    window.location.href = mailtoUrl;
+    window.open(mailtoUrl, '_blank');
   }
 
   function handleCopyLink(activityName, description, schedule) {
@@ -584,19 +591,19 @@ document.addEventListener("DOMContentLoaded", () => {
       </p>
       ${capacityIndicator}
       <div class="social-share-buttons">
-        <button class="share-btn share-twitter tooltip" data-activity="${name}" data-schedule="${formattedSchedule}" data-description="${details.description.replace(/"/g, '&quot;')}" title="Share on Twitter">
+        <button class="share-btn share-twitter tooltip" data-activity="${encodeHTML(name)}" data-schedule="${encodeHTML(formattedSchedule)}" data-description="${encodeHTML(details.description)}" title="Share on Twitter">
           <span class="share-icon">🐦</span>
           <span class="tooltip-text">Share on Twitter</span>
         </button>
-        <button class="share-btn share-facebook tooltip" data-activity="${name}" title="Share on Facebook">
+        <button class="share-btn share-facebook tooltip" data-activity="${encodeHTML(name)}" title="Share on Facebook">
           <span class="share-icon">📘</span>
           <span class="tooltip-text">Share on Facebook</span>
         </button>
-        <button class="share-btn share-email tooltip" data-activity="${name}" data-schedule="${formattedSchedule}" data-description="${details.description.replace(/"/g, '&quot;')}" title="Share via Email">
+        <button class="share-btn share-email tooltip" data-activity="${encodeHTML(name)}" data-schedule="${encodeHTML(formattedSchedule)}" data-description="${encodeHTML(details.description)}" title="Share via Email">
           <span class="share-icon">✉️</span>
           <span class="tooltip-text">Share via Email</span>
         </button>
-        <button class="share-btn share-copy tooltip" data-activity="${name}" data-schedule="${formattedSchedule}" data-description="${details.description.replace(/"/g, '&quot;')}" title="Copy Link">
+        <button class="share-btn share-copy tooltip" data-activity="${encodeHTML(name)}" data-schedule="${encodeHTML(formattedSchedule)}" data-description="${encodeHTML(details.description)}" title="Copy Link">
           <span class="share-icon">🔗</span>
           <span class="tooltip-text">Copy Link</span>
         </button>
